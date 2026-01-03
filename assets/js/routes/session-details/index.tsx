@@ -17,7 +17,9 @@ import { sessionsCollection } from "../../collections";
 export const SessionDetailsRoute = () => {
   const { sessionId } = useParams({ from: "/app/sessions/$sessionId" });
   const navigate = useNavigate();
-  const [currentView, setCurrentView] = useState<"manage" | "vote">("manage");
+  const [currentView, setCurrentView] = useState<"manage" | "vote" | "results">(
+    "manage",
+  );
   const [isClosingSession, setIsClosingSession] = useState(false);
 
   const currentUserId = getCurrentUserId();

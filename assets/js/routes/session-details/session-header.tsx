@@ -7,9 +7,9 @@ interface SessionHeaderProps {
   session: Session;
   isSessionOwner: boolean;
   isClosingSession: boolean;
-  currentView: "manage" | "vote";
+  currentView: "manage" | "vote" | "results";
   onCloseSession?: () => void;
-  onViewChange: (view: "manage" | "vote") => void;
+  onViewChange: (view: "manage" | "vote" | "results") => void;
 }
 
 export const SessionHeader: React.FC<SessionHeaderProps> = ({

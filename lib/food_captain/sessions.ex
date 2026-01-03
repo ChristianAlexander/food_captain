@@ -134,6 +134,13 @@ defmodule FoodCaptain.Sessions do
     end
   end
 
+  def get_user_vote(%{"id" => id}, user_scope) do
+    from(v in FoodCaptain.Sessions.Vote,
+      where: v.id == ^id and v.user_id == ^user_scope.user.id
+    )
+    |> FoodCaptain.Repo.one()
+  end
+
   def get_session_option(id) do
     Repo.get(Option, id)
   end
@@ -142,6 +149,14 @@ defmodule FoodCaptain.Sessions do
     %Option{}
     |> Option.changeset(attrs, session_id)
     |> Repo.insert()
+  end
+
+  def create_session_options(session_id, attrs_list) do
+    Enum.with_index(attrs_list)
+    |> Enum.reduce(Ecto.Multi.new(), fn {attrs, idx}, multi ->
+      Ecto.Multi.insert(multi, "option_#{idx}", Option.changeset(%Option{}, attrs, session_id))
+    end)
+    |> FoodCaptain.Repo.transaction()
   end
 
   def update_session_option(%Option{} = option, attrs) do
