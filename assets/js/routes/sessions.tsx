@@ -5,29 +5,31 @@ import { uuidv7 } from "uuidv7";
 import { SessionsList, LoadingState, ErrorState } from "../components";
 import { Session } from "../schemas";
 import { getCurrentUserId } from "../util";
+import { sessionsCollection } from "../collections";
 
 export const SessionsRoute = () => {
-  const sessions: Session[] = [
-    {
-      id: "1",
-      name: "Lunch Order",
-      inserted_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      user_id: getCurrentUserId(),
+  const {
+    data: sessions,
+    isLoading,
+    isError,
+    status,
+  } = useLiveQuery((q) =>
+    q
+      .from({ session: sessionsCollection })
+      .where(({ session }) => eq(session.user_id, getCurrentUserId()))
+      .orderBy(({ session }) => session.inserted_at, "desc"),
+  );
+
+  const handleCreateSession = (name: string) => {
+    sessionsCollection.insert({
+      id: uuidv7(),
+      name: name,
       state: "open",
-    },
-    {
-      id: "2",
-      name: "Family Dinner",
       inserted_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
       user_id: getCurrentUserId(),
-      state: "closed",
-    },
-  ];
-  const isLoading = false;
-  const isError = false;
-  const status = null;
+    });
+  };
 
   if (isLoading) {
     return <LoadingState message="Loading your sessions..." />;
@@ -42,5 +44,7 @@ export const SessionsRoute = () => {
     );
   }
 
-  return <SessionsList sessions={sessions} />;
+  return (
+    <SessionsList sessions={sessions} onCreateSession={handleCreateSession} />
+  );
 };
