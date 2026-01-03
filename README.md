@@ -2,6 +2,10 @@
 
 A demonstration of local-first database synchronization using **TanStack DB** and **Phoenix Sync**. Companion to a two-part YouTube video series on building local-first web applications in React.
 
+Part 1:
+
+[![Watch the video](https://img.youtube.com/vi/2J48c2sukbo/maxresdefault.jpg)](https://youtu.be/2J48c2sukbo)
+
 ## Getting Started
 
 This project supports two development modes:
