@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useRef } from "react";
 import { eq, Transaction, useLiveQuery } from "@tanstack/react-db";
 import { uuidv7 } from "uuidv7";
 
 import { Card, OptionCard, useToast } from "../../components";
 import { SessionOption } from "../../schemas";
+import { optionsCollection } from "../../collections";
+import { createSessionOptionTransaction } from "../../mutations";
 
 interface OptionsManagementProps {
   sessionId: string;
@@ -12,12 +14,118 @@ interface OptionsManagementProps {
 export const OptionsManagement: React.FC<OptionsManagementProps> = ({
   sessionId,
 }) => {
+  const pendingTransactions = useRef<Map<string, Transaction>>(new Map());
   const { addToast } = useToast();
-  const options = [] as SessionOption[];
+  const { data: options } = useLiveQuery(
+    (q) =>
+      q
+        .from({ option: optionsCollection })
+        .where(({ option }) => eq(option.session_id, sessionId))
+        .orderBy(({ option }) => option.inserted_at, "desc"),
+    [sessionId],
+  );
 
   const onAddOption = async () => {
-    console.log("Add an option");
-    addToast("Add an option", "info");
+    try {
+      const optionId = uuidv7();
+      const tx = createSessionOptionTransaction();
+
+      tx.mutate(() => {
+        optionsCollection.insert({
+          id: optionId,
+          name: "",
+          session_id: sessionId,
+          inserted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      });
+
+      pendingTransactions.current.set(optionId, tx);
+    } catch (error) {
+      console.error("Failed to create restaurant option:", error);
+      addToast(
+        "Failed to create restaurant option. Please try again.",
+        "error",
+      );
+    }
+  };
+
+  const onSaveOption = async (optionId: string, name: string) => {
+    const pendingTx = pendingTransactions.current.get(optionId);
+
+    if (pendingTx) {
+      try {
+        pendingTx.mutate(() => {
+          optionsCollection.update(optionId, (d) => {
+            d.name = name;
+            d.updated_at = new Date().toISOString();
+          });
+        });
+
+        await pendingTx.commit();
+      } catch (error) {
+        console.error("Failed to save restaurant option:", error);
+        addToast(
+          "Failed to save restaurant option. Please try again.",
+          "error",
+        );
+      }
+
+      pendingTransactions.current.delete(optionId);
+    } else {
+      try {
+        const tx = optionsCollection.update(optionId, (d) => {
+          d.name = name;
+          d.updated_at = new Date().toISOString();
+        });
+
+        await tx.isPersisted.promise;
+      } catch (error) {
+        console.error("Failed to update restaurant option:", error);
+        addToast(
+          "Failed to update restaurant option. Please try again.",
+          "error",
+        );
+      }
+    }
+  };
+
+  const onCancelOption = (optionId: string) => {
+    const pendingTx = pendingTransactions.current.get(optionId);
+
+    if (pendingTx) {
+      pendingTx.rollback();
+
+      pendingTransactions.current.delete(optionId);
+    }
+  };
+
+  const onAddDemoRestaurants = () => {
+    const demoRestaurants = [
+      "Pizza Palace",
+      "Burger Barn",
+      "Taco Town",
+      "Sushi Spot",
+      "Pasta Place",
+    ];
+
+    const tx = createSessionOptionTransaction();
+    demoRestaurants.forEach((name, index) => {
+      tx.mutate(() => {
+        optionsCollection.insert({
+          id: uuidv7(),
+          name,
+          session_id: sessionId,
+          inserted_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      });
+    });
+    tx.commit().catch((error) => {
+      console.error("Failed to create demo restaurant:", error);
+    });
+
+    addToast("Added demo restaurants for testing!", "success");
   };
 
   return (
@@ -43,6 +151,13 @@ export const OptionsManagement: React.FC<OptionsManagementProps> = ({
               className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1"
             >
               Add First Restaurant
+            </button>
+
+            <button
+              onClick={onAddDemoRestaurants}
+              className="bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-300 px-6 py-3 rounded-xl font-semibold transition-all duration-200 border border-slate-300 dark:border-slate-600"
+            >
+              Add Demo Restaurants
             </button>
           </div>
         </div>
@@ -73,7 +188,12 @@ export const OptionsManagement: React.FC<OptionsManagementProps> = ({
               </button>
             </Card>
             {options.map((option) => (
-              <OptionCard key={option.id} option={option} />
+              <OptionCard
+                key={option.id}
+                option={option}
+                onSave={onSaveOption}
+                onCancel={onCancelOption}
+              />
             ))}
           </div>
         </div>
