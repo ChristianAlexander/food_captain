@@ -1,0 +1,121 @@
+<Layouts.flash_group flash={@flash} />
+
+<!-- Subtle nautical pattern background -->
+<Layouts.nautical_background class="opacity-[0.03] text-slate-900 dark:text-slate-100" />
+
+<!-- Main content -->
+<div class="relative z-10 min-h-screen">
+  <!-- Header -->
+  <header class="px-4 py-6 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center max-w-7xl mx-auto">
+      <div class="flex items-center space-x-3">
+        <.icon name="captain-wheel" class="w-10 h-10 text-primary" />
+        <h1 class="text-2xl font-bold text-slate-900 dark:text-slate-100">Food Captain</h1>
+      </div>
+      <Layouts.theme_toggle />
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="px-4 py-16 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center max-w-4xl mx-auto">
+        <!-- Main headline -->
+        <h2 class="text-5xl sm:text-6xl lg:text-7xl font-bold text-slate-900 dark:text-slate-100 leading-tight mb-8">
+          Navigate the
+          <span class="text-transparent bg-clip-text bg-linear-to-r from-blue-600 via-purple-600 to-teal-600 dark:from-blue-400 dark:via-purple-400 dark:to-teal-400">
+            perfect meal
+          </span>
+          with your crew
+        </h2>
+
+        <!-- Subheadline -->
+        <p class="text-xl sm:text-2xl text-slate-600 dark:text-slate-300 mb-12 leading-relaxed max-w-3xl mx-auto">
+          Stop the endless “where should we eat?” debates.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
+          <.link href={~p"/app"} class="bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+            Start a Food Vote
+          </.link>
+          <a href="#how-it-works" class="border-2 border-slate-300 hover:border-slate-400 dark:border-slate-600 dark:hover:border-slate-500 text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 px-8 py-4 rounded-xl text-lg font-semibold transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800">
+            See How It Works
+          </a>
+        </div>
+      </div>
+
+      <!-- Feature Cards -->
+      <div class="grid lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
+        <!-- Ranked Choice Feature -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6">
+            <.icon name="hero-numbered-list" class="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Ranked Choice Voting</h3>
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+            Everyone ranks their restaurant preferences. Our algorithm finds the choice that makes the most people happy, not just the loudest voice.
+          </p>
+        </div>
+
+        <!-- Group Harmony Feature -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-6">
+            <.icon name="hero-user-group" class="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Group Harmony</h3>
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+            No more arguments or hurt feelings. Everyone gets a voice, and the math ensures the fairest outcome for your dining crew.
+          </p>
+        </div>
+
+        <!-- Quick & Easy Feature -->
+        <div class="bg-white dark:bg-slate-800 rounded-2xl p-8 shadow-lg border border-slate-200 dark:border-slate-700 hover:shadow-xl transition-shadow duration-300">
+          <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-xl flex items-center justify-center mb-6">
+            <.icon name="hero-clock" class="w-6 h-6 text-teal-600 dark:text-teal-400" />
+          </div>
+          <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-4">Quick & Easy</h3>
+          <p class="text-slate-600 dark:text-slate-300 leading-relaxed">
+            Create a vote in seconds. Share with friends. Get results instantly. Spend less time deciding and more time enjoying great food together.
+          </p>
+        </div>
+      </div>
+
+      <!-- How It Works Section -->
+      <div class="mt-24 text-center" id="how-it-works">
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-12">Chart Your Course in 3 Simple Steps</h3>
+
+        <div class="grid md:grid-cols-3 gap-12 max-w-5xl mx-auto">
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-blue-600 dark:bg-blue-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">1</div>
+            <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Add Restaurants</h4>
+            <p class="text-slate-600 dark:text-slate-300">Suggest restaurants you'd like to try. Everyone can add their favorites to the list.</p>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-purple-600 dark:bg-purple-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">2</div>
+            <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Rank Your Choices</h4>
+            <p class="text-slate-600 dark:text-slate-300">Everyone privately ranks the restaurants from most to least preferred. No pressure, no judgment.</p>
+          </div>
+
+          <div class="flex flex-col items-center">
+            <div class="w-16 h-16 bg-teal-600 dark:bg-teal-500 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">3</div>
+            <h4 class="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-3">Discover the Winner</h4>
+            <p class="text-slate-600 dark:text-slate-300">Our algorithm finds the restaurant that satisfies the most people. Time to set sail for dinner!</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Final CTA -->
+      <div class="mt-24 text-center bg-linear-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl p-12 border border-slate-200 dark:border-slate-700">
+        <h3 class="text-3xl font-bold text-slate-900 dark:text-slate-100 mb-6">Ready to End the Food Debates?</h3>
+        <p class="text-xl text-slate-600 dark:text-slate-300 mb-8 max-w-2xl mx-auto">
+          Join crews around the world who've discovered the secret to stress-free group dining decisions.
+        </p>
+        <.link href={~p"/app"} class="bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 dark:from-blue-500 dark:to-purple-500 dark:hover:from-blue-600 dark:hover:to-purple-600 text-white px-10 py-4 rounded-xl text-lg font-semibold transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+          Create Your First Vote
+        </.link>
+      </div>
+    </div>
+  </main>
+</div>

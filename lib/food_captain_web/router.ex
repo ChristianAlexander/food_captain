@@ -1,0 +1,96 @@
+defmodule FoodCaptainWeb.Router do
+  use FoodCaptainWeb, :router
+
+  import FoodCaptainWeb.UserAuth
+  # import Phoenix.Sync.Router
+
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {FoodCaptainWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
+  end
+
+  pipeline :api do
+    plug :fetch_session
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+    plug :fetch_current_scope_for_user
+    plug :accepts, ["json"]
+  end
+
+  scope "/", FoodCaptainWeb do
+    pipe_through :browser
+
+    get "/", PageController, :home
+  end
+
+  scope "/app", FoodCaptainWeb do
+    pipe_through :browser
+    # pipe_through [:browser, :require_authenticated_user]
+
+    get "/*path", PageController, :app
+  end
+
+  scope "/api", FoodCaptainWeb do
+    pipe_through [:api, :require_authenticated_user]
+
+    # sync("/shapes/sessions", FoodCaptain.Sessions.Session)
+    # post "/sessions", SessionsController, :create
+    # patch "/sessions/:id", SessionsController, :update
+    # post "/sessions/:session_id/options", OptionsController, :create
+    # patch "/sessions/:session_id/options/:id", OptionsController, :update
+    # put "/sessions/:session_id/votes", VotesController, :update
+    # get "/sessions/:session_id/results", VotesController, :ranked_choice_results
+    # get "/shapes/sessions", ShapeController, :my_sessions
+    # get "/shapes/sessions/:id", ShapeController, :session
+    # get "/shapes/sessions/:id/options", ShapeController, :session_options
+    # get "/shapes/sessions/:id/my-votes", ShapeController, :my_session_votes
+  end
+
+  # Enable LiveDashboard and Swoosh mailbox preview in development
+  if Application.compile_env(:food_captain, :dev_routes) do
+    # If you want to use the LiveDashboard in production, you should put
+    # it behind authentication and allow only admins to access it.
+    # If your application does not have an admins-only section yet,
+    # you can use Plug.BasicAuth to set up some basic authentication
+    # as long as you are also using SSL (which you should anyway).
+    import Phoenix.LiveDashboard.Router
+
+    scope "/dev" do
+      pipe_through :browser
+
+      live_dashboard "/dashboard", metrics: FoodCaptainWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
+    end
+  end
+
+  ## Authentication routes
+
+  scope "/", FoodCaptainWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    get "/users/register", UserRegistrationController, :new
+    post "/users/register", UserRegistrationController, :create
+  end
+
+  scope "/", FoodCaptainWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    get "/users/settings", UserSettingsController, :edit
+    put "/users/settings", UserSettingsController, :update
+    get "/users/settings/confirm-email/:token", UserSettingsController, :confirm_email
+  end
+
+  scope "/", FoodCaptainWeb do
+    pipe_through [:browser]
+
+    get "/users/log-in", UserSessionController, :new
+    get "/users/log-in/:token", UserSessionController, :confirm
+    post "/users/log-in", UserSessionController, :create
+    delete "/users/log-out", UserSessionController, :delete
+  end
+end
