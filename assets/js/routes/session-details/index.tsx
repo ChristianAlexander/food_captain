@@ -12,6 +12,7 @@ import { Session } from "../../schemas";
 import { OptionsManagement } from "./options-management";
 import { SessionHeader } from "./session-header";
 import { VotingInterface } from "./voting-interface";
+import { sessionsCollection } from "../../collections";
 
 export const SessionDetailsRoute = () => {
   const { sessionId } = useParams({ from: "/app/sessions/$sessionId" });
@@ -20,10 +21,19 @@ export const SessionDetailsRoute = () => {
   const [isClosingSession, setIsClosingSession] = useState(false);
 
   const currentUserId = getCurrentUserId();
-  const session = null as Session | null;
-  const isSessionLoading = false;
-  const isSessionError = false;
-  const sessionStatus = null;
+  const {
+    data: session,
+    isLoading: isSessionLoading,
+    isError: isSessionError,
+    status: sessionStatus,
+  } = useLiveQuery(
+    (q) =>
+      q
+        .from({ session: sessionsCollection })
+        .where(({ session }) => eq(session.id, sessionId))
+        .findOne(),
+    [sessionId],
+  );
 
   if (isSessionLoading) {
     return <LoadingState message="Loading session details..." />;
