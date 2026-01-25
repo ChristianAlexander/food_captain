@@ -1,11 +1,20 @@
 defmodule FoodCaptainWeb.SessionsController do
   use FoodCaptainWeb, :controller
 
+  alias FoodCaptain.Repo
   alias FoodCaptain.Sessions
 
   def create(conn, %{"data" => data}) do
-    {:ok, _session} = Sessions.create_session(conn.assigns.current_scope, data)
-    resp(conn, :no_content, "")
+    {:ok, txid} =
+      Repo.transact(fn repo ->
+        with {:ok, _session} <- Sessions.create_session(conn.assigns.current_scope, data) do
+          txid = Phoenix.Sync.Writer.txid!(repo)
+
+          {:ok, txid}
+        end
+      end)
+
+    json(conn, %{txid: txid})
   end
 
   def update(conn, %{"id" => id, "data" => data}) do
@@ -20,7 +29,7 @@ defmodule FoodCaptainWeb.SessionsController do
       session ->
         if Sessions.session_owner?(session, user_scope) do
           {:ok, txid} =
-            FoodCaptain.Repo.transact(fn repo ->
+            Repo.transact(fn repo ->
               with {:ok, _session} <- Sessions.update_session(user_scope, session, data) do
                 txid = Phoenix.Sync.Writer.txid!(repo)
                 {:ok, txid}
