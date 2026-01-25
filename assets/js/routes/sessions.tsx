@@ -16,7 +16,6 @@ export const SessionsRoute = () => {
   } = useLiveQuery((q) =>
     q
       .from({ session: sessionsCollection })
-      .where(({ session }) => eq(session.user_id, getCurrentUserId()))
       .orderBy(({ session }) => session.inserted_at, "desc"),
   );
 

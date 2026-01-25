@@ -1,8 +1,11 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { useLiveQuery } from "@tanstack/react-db";
 import { eq, type Transaction } from "@tanstack/db";
 
-import { votesCollection, optionsCollection } from "../collections";
+import {
+  sessionOptionsCollection,
+  sessionVotesCollection,
+} from "../collections";
 import { createSessionVoteTransaction } from "../mutations";
 import { SessionVote } from "../schemas";
 
@@ -11,16 +14,23 @@ export function useVoting(sessionId: string) {
 
   const getVoteTransaction = () => {
     if (!voteTransactionRef.current) {
-      voteTransactionRef.current = createSessionVoteTransaction();
+      voteTransactionRef.current = createSessionVoteTransaction(sessionId);
     }
     return voteTransactionRef.current;
   };
+  const optionsCollection = useMemo(
+    () => sessionOptionsCollection(sessionId),
+    [sessionId],
+  );
+  const votesCollection = useMemo(
+    () => sessionVotesCollection(sessionId),
+    [sessionId],
+  );
 
   const { data: options, isLoading: isLoading } = useLiveQuery(
     (q) =>
       q
         .from({ option: optionsCollection })
-        .where(({ option }) => eq(option.session_id, sessionId))
         .leftJoin({ vote: votesCollection }, ({ option, vote }) =>
           eq(option.id, vote.option_id),
         )

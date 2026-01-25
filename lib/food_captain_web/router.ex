@@ -2,6 +2,7 @@ defmodule FoodCaptainWeb.Router do
   use FoodCaptainWeb, :router
 
   import FoodCaptainWeb.UserAuth
+  import Phoenix.Sync.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -28,15 +29,23 @@ defmodule FoodCaptainWeb.Router do
   end
 
   scope "/app", FoodCaptainWeb do
-    pipe_through :browser
-    # pipe_through [:browser, :require_authenticated_user]
+    pipe_through [:browser, :require_authenticated_user]
 
     get "/*path", PageController, :app
   end
 
   scope "/api", FoodCaptainWeb do
-    pipe_through :api
-    # pipe_through [:api, :require_authenticated_user]
+    pipe_through [:api, :require_authenticated_user]
+
+    post "/sessions", SessionsController, :create
+    patch "/sessions/:id", SessionsController, :update
+    post "/sessions/:session_id/options", OptionsController, :create
+    patch "/sessions/:session_id/options/:id", OptionsController, :update
+    put "/sessions/:session_id/votes", VotesController, :update
+    get "/shapes/sessions", ShapeController, :my_sessions
+    get "/shapes/sessions/:id", ShapeController, :session
+    get "/shapes/sessions/:id/options", ShapeController, :session_options
+    get "/shapes/sessions/:id/my-votes", ShapeController, :my_session_votes
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development

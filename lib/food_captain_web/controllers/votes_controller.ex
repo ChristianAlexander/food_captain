@@ -8,7 +8,7 @@ defmodule FoodCaptainWeb.VotesController do
 
   def update(conn, %{"operations" => operations, "session_id" => session_id})
       when is_list(operations) do
-    _user_scope = conn.assigns.current_scope
+    user_scope = conn.assigns.current_scope
 
     case Sessions.get_session(session_id) do
       nil ->
@@ -17,7 +17,49 @@ defmodule FoodCaptainWeb.VotesController do
         |> json(%{error: "Session not found"})
 
       _session ->
-        resp(conn, :no_content, "")
+        {:ok, txid, _changes} =
+          Writer.new()
+          |> Writer.allow(
+            Sessions.Vote,
+            load: fn attrs -> Sessions.get_user_vote(attrs, user_scope) end,
+            validate: fn vote, changes ->
+              Sessions.Vote.changeset(vote, changes, user_scope, session_id)
+            end
+          )
+          |> Writer.to_multi(operations, format: Writer.Format.TanstackDB)
+          |> Ecto.Multi.run(:validate_sequential_votes, fn repo, _changes ->
+            user_votes =
+              from(v in FoodCaptain.Sessions.Vote,
+                where: v.user_id == ^user_scope.user.id and v.session_id == ^session_id,
+                select: v.rank,
+                order_by: v.rank
+              )
+              |> repo.all()
+
+            case user_votes do
+              [] ->
+                {:ok, nil}
+
+              ranks ->
+                unique_ranks = Enum.uniq(ranks)
+
+                if length(ranks) != length(unique_ranks) do
+                  {:error, "Duplicate rankings are not allowed"}
+                else
+                  # Check for sequential votes starting from 1
+                  expected_sequence = Enum.to_list(1..length(ranks))
+
+                  if ranks == expected_sequence do
+                    {:ok, nil}
+                  else
+                    {:error, "Votes must be sequential starting from 1 (e.g., 1, 2, 3)"}
+                  end
+                end
+            end
+          end)
+          |> Writer.transaction(FoodCaptain.Repo)
+
+        json(conn, %{txid: txid})
     end
   end
 end
