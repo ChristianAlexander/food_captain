@@ -3,9 +3,58 @@ import {
   TransactionWithMutations,
 } from "@tanstack/react-db";
 
-import { createApiInsertFn } from "./collections";
 import { MatchingStrategy } from "@tanstack/electric-db-collection/dist/esm/electric";
 import { getCSRFToken, relativeUrl } from "./util";
+
+export function createApiInsertFn(resource: string) {
+  return async ({
+    transaction,
+  }: {
+    transaction: TransactionWithMutations;
+  }): Promise<MatchingStrategy> => {
+    let data: any = transaction.mutations[0].changes;
+    if (transaction.mutations.length > 1) {
+      data = transaction.mutations.map((mutation) => mutation.changes);
+    }
+    const response = await fetch(relativeUrl(`/api/${resource}`), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-csrf-token": getCSRFToken() ?? "",
+      },
+      body: JSON.stringify({ data }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to save");
+    }
+  };
+}
+
+export const createApiUpdateFn = (resource: string) => {
+  return async ({
+    transaction,
+  }: {
+    transaction: TransactionWithMutations;
+  }): Promise<MatchingStrategy> => {
+    const mutation = transaction.mutations[0];
+    const response = await fetch(
+      relativeUrl(`/api/${resource}/${mutation.key}`),
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          "x-csrf-token": getCSRFToken() ?? "",
+        },
+        body: JSON.stringify({ data: mutation.changes }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to update");
+    }
+  };
+};
 
 export function createSessionOptionTransaction(sessionId: string) {
   return createTransaction({
