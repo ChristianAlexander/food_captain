@@ -26,6 +26,25 @@ export const SessionDetailsRoute = () => {
     [sessionId],
   );
 
+  const handleCloseSession = async () => {
+    if (isClosingSession) return;
+
+    setIsClosingSession(true);
+    try {
+      const tx = sessionCollection.update(sessionId, (session) => {
+        session.state = "closed";
+        session.updated_at = new Date().toISOString();
+      });
+
+      await tx.isPersisted.promise;
+      setCurrentView("results");
+    } catch (error) {
+      console.error("Failed to close session:", error);
+    } finally {
+      setIsClosingSession(false);
+    }
+  };
+
   const currentUserId = getCurrentUserId();
   const {
     data: session,
@@ -68,6 +87,7 @@ export const SessionDetailsRoute = () => {
         isClosingSession={isClosingSession}
         currentView={currentView}
         onViewChange={setCurrentView}
+        onCloseSession={handleCloseSession}
       />
 
       {session.state === "closed" ? (

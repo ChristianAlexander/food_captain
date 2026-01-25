@@ -39,6 +39,7 @@ defmodule FoodCaptainWeb.Router do
 
     post "/sessions", SessionsController, :create
     patch "/sessions/:id", SessionsController, :update
+    get "/sessions/:session_id/results", VotesController, :ranked_choice_results
     post "/sessions/:session_id/options", OptionsController, :create
     patch "/sessions/:session_id/options/:id", OptionsController, :update
     put "/sessions/:session_id/votes", VotesController, :update

@@ -62,4 +62,22 @@ defmodule FoodCaptainWeb.VotesController do
         json(conn, %{txid: txid})
     end
   end
+
+  def ranked_choice_results(conn, %{"session_id" => session_id}) do
+    case Sessions.get_ranked_choice_data(session_id) do
+      {:error, :not_found} ->
+        conn
+        |> put_status(:not_found)
+        |> json(%{error: "Session not found"})
+
+      {:error, :session_not_closed} ->
+        conn
+        |> put_status(:bad_request)
+        |> json(%{error: "Session must be closed to calculate ranked choice results"})
+
+      {:ok, session_with_data} ->
+        results = Sessions.RankedChoiceVoting.calculate_results(session_with_data)
+        json(conn, results)
+    end
+  end
 end
