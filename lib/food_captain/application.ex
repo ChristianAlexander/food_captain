@@ -15,8 +15,7 @@ defmodule FoodCaptain.Application do
       # Start a worker by calling: FoodCaptain.Worker.start_link(arg)
       # {FoodCaptain.Worker, arg},
       # Start to serve requests, typically the last entry
-      FoodCaptainWeb.Endpoint
-      # {FoodCaptainWeb.Endpoint, phoenix_sync: Phoenix.Sync.plug_opts()}
+      {FoodCaptainWeb.Endpoint, phoenix_sync: Phoenix.Sync.plug_opts()}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

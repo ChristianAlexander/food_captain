@@ -1,11 +1,11 @@
-import React, { useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import { eq, Transaction, useLiveQuery } from "@tanstack/react-db";
 import { uuidv7 } from "uuidv7";
 
 import { Card, OptionCard, useToast } from "../../components";
 import { SessionOption } from "../../schemas";
-import { optionsCollection } from "../../collections";
 import { createSessionOptionTransaction } from "../../mutations";
+import { sessionOptionsCollection } from "../../collections";
 
 interface OptionsManagementProps {
   sessionId: string;
@@ -16,11 +16,14 @@ export const OptionsManagement: React.FC<OptionsManagementProps> = ({
 }) => {
   const pendingTransactions = useRef<Map<string, Transaction>>(new Map());
   const { addToast } = useToast();
+  const optionsCollection = useMemo(
+    () => sessionOptionsCollection(sessionId),
+    [sessionId],
+  );
   const { data: options } = useLiveQuery(
     (q) =>
       q
         .from({ option: optionsCollection })
-        .where(({ option }) => eq(option.session_id, sessionId))
         .orderBy(({ option }) => option.inserted_at, "desc"),
     [sessionId],
   );
@@ -28,7 +31,7 @@ export const OptionsManagement: React.FC<OptionsManagementProps> = ({
   const onAddOption = async () => {
     try {
       const optionId = uuidv7();
-      const tx = createSessionOptionTransaction();
+      const tx = createSessionOptionTransaction(sessionId);
 
       tx.mutate(() => {
         optionsCollection.insert({
@@ -109,7 +112,7 @@ export const OptionsManagement: React.FC<OptionsManagementProps> = ({
       "Pasta Place",
     ];
 
-    const tx = createSessionOptionTransaction();
+    const tx = createSessionOptionTransaction(sessionId);
     demoRestaurants.forEach((name, index) => {
       tx.mutate(() => {
         optionsCollection.insert({

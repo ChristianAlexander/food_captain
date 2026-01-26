@@ -24,6 +24,11 @@ config :food_captain,
   ecto_repos: [FoodCaptain.Repo],
   generators: [timestamp_type: :utc_datetime, binary_id: true]
 
+config :phoenix_sync,
+  env: config_env(),
+  mode: :embedded,
+  repo: FoodCaptain.Repo
+
 # Configure the endpoint
 config :food_captain, FoodCaptainWeb.Endpoint,
   url: [host: "localhost"],

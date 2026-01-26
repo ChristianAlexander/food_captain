@@ -40,8 +40,8 @@ defmodule FoodCaptain.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      # {:electric, "~> 1.0"},
-      # {:phoenix_sync, "0.6.0"},
+      {:electric, "~> 1.0"},
+      {:phoenix_sync, "0.6.0"},
       {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.8.3"},
       {:phoenix_ecto, "~> 4.5"},

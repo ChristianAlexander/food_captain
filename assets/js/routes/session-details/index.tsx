@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { eq, useLiveQuery } from "@tanstack/react-db";
 
@@ -12,7 +12,7 @@ import { Session } from "../../schemas";
 import { OptionsManagement } from "./options-management";
 import { SessionHeader } from "./session-header";
 import { VotingInterface } from "./voting-interface";
-import { sessionsCollection } from "../../collections";
+import { singleSessionCollection } from "../../collections";
 
 export const SessionDetailsRoute = () => {
   const { sessionId } = useParams({ from: "/app/sessions/$sessionId" });
@@ -21,6 +21,29 @@ export const SessionDetailsRoute = () => {
     "manage",
   );
   const [isClosingSession, setIsClosingSession] = useState(false);
+  const sessionCollection = useMemo(
+    () => singleSessionCollection(sessionId),
+    [sessionId],
+  );
+
+  const handleCloseSession = async () => {
+    if (isClosingSession) return;
+
+    setIsClosingSession(true);
+    try {
+      const tx = sessionCollection.update(sessionId, (session) => {
+        session.state = "closed";
+        session.updated_at = new Date().toISOString();
+      });
+
+      await tx.isPersisted.promise;
+      setCurrentView("results");
+    } catch (error) {
+      console.error("Failed to close session:", error);
+    } finally {
+      setIsClosingSession(false);
+    }
+  };
 
   const currentUserId = getCurrentUserId();
   const {
@@ -29,11 +52,7 @@ export const SessionDetailsRoute = () => {
     isError: isSessionError,
     status: sessionStatus,
   } = useLiveQuery(
-    (q) =>
-      q
-        .from({ session: sessionsCollection })
-        .where(({ session }) => eq(session.id, sessionId))
-        .findOne(),
+    (q) => q.from({ session: sessionCollection }).findOne(),
     [sessionId],
   );
 
@@ -68,6 +87,7 @@ export const SessionDetailsRoute = () => {
         isClosingSession={isClosingSession}
         currentView={currentView}
         onViewChange={setCurrentView}
+        onCloseSession={handleCloseSession}
       />
 
       {session.state === "closed" ? (
