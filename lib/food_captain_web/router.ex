@@ -2,7 +2,6 @@ defmodule FoodCaptainWeb.Router do
   use FoodCaptainWeb, :router
 
   import FoodCaptainWeb.UserAuth
-  import Phoenix.Sync.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
