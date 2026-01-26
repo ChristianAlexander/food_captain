@@ -6,6 +6,10 @@ Part 1:
 
 [![Watch the video](https://img.youtube.com/vi/2J48c2sukbo/maxresdefault.jpg)](https://youtu.be/2J48c2sukbo)
 
+Part 2:
+
+[![Watch the video](https://img.youtube.com/vi/UerJDaIXyUI/maxresdefault.jpg)](https://youtu.be/UerJDaIXyUI)
+
 ## Getting Started
 
 This project supports two development modes:
